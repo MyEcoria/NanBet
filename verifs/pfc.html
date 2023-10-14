@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vérification de PFC</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: #333333;
+    }
+
+    form {
+      margin-top: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    input[type="text"] {
+      width: calc(100% - 24px); /* Largeur du champ de saisie avec une marge de 12px à gauche et à droite */
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+      margin-right: 12px; /* Ajoute un espace de 12px à droite du champ de saisie */
+    }
+
+    #choice {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+    }
+
+    .choice-option {
+      display: flex;
+      align-items: center;
+    }
+  </style>
+</head>
+
+<body>
+    <div class="container">
+      <h1>Number Verification</h1>
+  
+      <form id="verificationForm">
+        <label for="publicSeed">Public Seed:</label>
+        <input type="text" id="publicSeed" required><br>
+  
+        <label for="privateSeed">Private Seed:</label>
+        <input type="text" id="privateSeed" required><br>
+  
+        <label for="choice">Choice:</label>
+        <select id="choice" required>
+            <option value="1" class="choice-option">
+            <img src="https://symbl-world.akamaized.net/i/webp/f2/0e29d778af528ff18585b3c4088835.webp" class="choice-img" alt="Rock">
+            Rock
+            </option>
+            <option value="2" class="choice-option">
+            <img src="https://symbl-world.akamaized.net/i/webp/77/ec9b6d839eb7a9868c98b397842442.webp" class="choice-img" alt="Paper">
+            Paper
+            </option>
+            <option value="3" class="choice-option">
+            <img src="https://symbl-world.akamaized.net/i/webp/c4/aa8b2a5d6d7304241d56de9f82e3d9.webp" class="choice-img" alt="Scissors">
+            Scissors
+            </option>
+        </select><br>
+  
+        <button type="button" onclick="generateAndVerify()">Verify</button>
+      </form>
+  
+      <div id="result"></div>
+    </div>
+  
+    <script>
+      async function generateNumber(publicSeed, privateSeed, choice) {
+        // Concatenate public seed, private seed, and choice
+        const combinedSeed = `${publicSeed}${privateSeed}${choice}`;
+  
+        // Convert the string to an ArrayBuffer
+        const encoder = new TextEncoder();
+        const data = encoder.encode(combinedSeed);
+  
+        // Use Web Crypto API to generate SHA-256 hash
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  
+        // Convert the ArrayBuffer result to hexadecimal string
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+        // Convert the hash to a number between 1 and 300 (1/3 chance for each result)
+        const hashValue = parseInt(hashHex, 16);
+        const randomNumber = (hashValue % 300) + 1;
+  
+        // Determine the final result based on randomNumber
+        let result;
+        if (randomNumber <= 100) {
+          result = 'win'; // 1/3 chance to win
+        } else if (randomNumber <= 200) {
+          result = 'draw'; // 1/3 chance for a draw
+        } else {
+          result = 'lose'; // 1/3 + 1% chance to lose
+        }
+  
+        return { number: result, hash: hashHex };
+      }
+  
+      function generateAndVerify() {
+        const publicSeed = document.getElementById('publicSeed').value;
+        const privateSeed = document.getElementById('privateSeed').value;
+        const choice = document.getElementById('choice').value;
+  
+        // Call generateNumber function with form values
+        generateNumber(publicSeed, privateSeed, choice)
+          .then(result => {
+            // Display the result
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `Result: ${result.number}<br>Hash: ${result.hash}`;
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      }
+    </script>
+  </body>
+
+</html>
