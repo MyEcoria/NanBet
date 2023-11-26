@@ -93,6 +93,30 @@
       align-items: center;
     }
   </style>
+
+  <script>
+    // Fonction pour récupérer les paramètres de l'URL
+    function getURLParameters() {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      return {
+        publicSeed: urlParams.get('publicSeed') || '',
+        privateSeed: urlParams.get('privateSeed') || '',
+        choice: urlParams.get('choice') || '1', // La valeur par défaut est '1' si le paramètre n'est pas présent
+      };
+    }
+
+    // Fonction pour pré-remplir le formulaire avec les paramètres de l'URL
+    function prefillForm() {
+      const params = getURLParameters();
+      document.getElementById('publicSeed').value = params.publicSeed;
+      document.getElementById('privateSeed').value = params.privateSeed;
+      document.getElementById('choice').value = params.choice;
+    }
+
+    // Appeler la fonction pour pré-remplir le formulaire lorsque la page est chargée
+    document.addEventListener('DOMContentLoaded', prefillForm);
+  </script>
 </head>
 
 <body>
@@ -130,37 +154,7 @@
 
   <script>
     async function generateNumber(publicSeed, privateSeed, choice) {
-      // Nouveau code JavaScript pour générer le numéro
-      const combinedSeed = `${publicSeed}:${choice}`;
-      const hash = crypto.createHmac('sha256', privateSeed).update(combinedSeed).digest('hex')
-      let i = 0;
-      const max = 3000;
-      let randFromHash = -1;
-      while (randFromHash === -1) {
-        if (i > hash.length - 3) {
-          randFromHash = 1500;
-        }
-        let hashPart = hash.substring(i, i + 3);
-        let value = parseInt(hashPart, 16);
-        if (value < max) {
-          randFromHash = value;
-        } else {
-          i += 3;
-          continue;
-        }
-      }
-
-      const house_edge = 0.01;
-      const house_edge_value = Math.ceil(max * house_edge);
-      let result;
-      if (randFromHash < 1000 - (house_edge_value)) {
-        result = 'win';
-      } else if (randFromHash < 2000) {
-        result = 'egal';
-      } else {
-        result = 'lose';
-      }
-      return { number: result, hash: hash };
+      // Le reste de votre code JavaScript ici
     }
 
     function generateAndVerify() {
