@@ -94,7 +94,7 @@
     }
   </style>
 
-  <script>
+<script>
     // Fonction pour récupérer les paramètres de l'URL
     function getURLParameters() {
       const queryString = window.location.search;
@@ -112,6 +112,16 @@
       document.getElementById('publicSeed').value = params.publicSeed;
       document.getElementById('privateSeed').value = params.privateSeed;
       document.getElementById('choice').value = params.choice;
+    }
+
+    // Fonction pour générer un hachage SHA-256 avec Web Crypto API
+    async function sha256(message) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+      return hashHex;
     }
 
     // Appeler la fonction pour pré-remplir le formulaire lorsque la page est chargée
@@ -156,7 +166,7 @@
     async function generateNumber(publicSeed, privateSeed, choice) {
       // Nouveau code JavaScript pour générer le numéro
       const combinedSeed = `${publicSeed}:${choice}`;
-      const hash = crypto.createHmac('sha256', privateSeed).update(combinedSeed).digest('hex')
+      const hash = await sha256(privateSeed + combinedSeed);
       let i = 0;
       const max = 3000;
       let randFromHash = -1;
