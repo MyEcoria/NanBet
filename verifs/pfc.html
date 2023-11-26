@@ -154,7 +154,37 @@
 
   <script>
     async function generateNumber(publicSeed, privateSeed, choice) {
-      // Le reste de votre code JavaScript ici
+      // Nouveau code JavaScript pour générer le numéro
+      const combinedSeed = `${publicSeed}:${choice}`;
+      const hash = crypto.createHmac('sha256', privateSeed).update(combinedSeed).digest('hex')
+      let i = 0;
+      const max = 3000;
+      let randFromHash = -1;
+      while (randFromHash === -1) {
+        if (i > hash.length - 3) {
+          randFromHash = 1500;
+        }
+        let hashPart = hash.substring(i, i + 3);
+        let value = parseInt(hashPart, 16);
+        if (value < max) {
+          randFromHash = value;
+        } else {
+          i += 3;
+          continue;
+        }
+      }
+
+      const house_edge = 0.01;
+      const house_edge_value = Math.ceil(max * house_edge);
+      let result;
+      if (randFromHash < 1000 - (house_edge_value)) {
+        result = 'win';
+      } else if (randFromHash < 2000) {
+        result = 'egal';
+      } else {
+        result = 'lose';
+      }
+      return { number: result, hash: hash };
     }
 
     function generateAndVerify() {
